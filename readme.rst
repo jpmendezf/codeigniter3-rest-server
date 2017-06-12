@@ -68,3 +68,23 @@ Acknowledgement
 
 The CodeIgniter team would like to thank EllisLab, all the
 contributors to the CodeIgniter project and you, the CodeIgniter user.
+
+#######################
+CodeIgniter Rest Server
+#######################
+
+A fully RESTful server implementation for CodeIgniter using one library, one config file and one controller.
+
+************
+Requirements
+************
+
+PHP 5.4 or greater
+CodeIgniter 3.0+
+Note: for 1.7.x support download v2.2 from Downloads tab
+
+*************************
+Important Update on 4.0.0
+*************************
+
+Please note that version 4.0.0 is in the works, and is considered a breaking change (per SemVer). As CI 3.1.0 now has native support for Composer, this library will be moving to be composer based.
