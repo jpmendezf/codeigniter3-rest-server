@@ -6,7 +6,11 @@ use Doctrine\Common\ClassLoader,
     Doctrine\ORM\Tools\Setup,
     Doctrine\ORM\EntityManager,
     Doctrine\ORM\Mapping\Driver\AnnotationDriver,
-    Doctrine\Common\Annotations\AnnotationReader;
+    Doctrine\Common\Annotations\AnnotationReader,
+    DoctrineExtensions\Query\Mysql\Date,
+    DoctrineExtensions\Query\Mysql\GroupConcat,
+    DoctrineExtensions\Query\Mysql\ConcatWs,
+    DoctrineExtensions\Query\Mysql\IfNull;
 
 /**
  * Doctrine bootstrap library for CodeIgniter
@@ -45,18 +49,30 @@ class Doctrine {
         $metadata_paths = array(APPPATH . 'models');
         $extension_dir = APPPATH . 'libraries/Doctrine';
         $dev_mode = true;
+        
+        if (ENVIRONMENT == "development"):
+            $cache = new Doctrine\Common\Cache\ArrayCache();
+        else:
+            $cache = new Doctrine\Common\Cache\ApcuCache();
+        endif;
 
-        $config = Setup::createAnnotationMetadataConfiguration($metadata_paths, $dev_mode, $proxies_dir);
+        $config = Setup::createAnnotationMetadataConfiguration($metadata_paths, $dev_mode, $proxies_dir, $cache);
+        $config->setMetadataCacheImpl($cache);
+        $config->setQueryCacheImpl($cache);
+        $config->setProxyDir($proxies_dir);
         $driver = new AnnotationDriver(new AnnotationReader());
         $config->setMetadataDriverImpl($driver);
 
-        require_once APPPATH . 'libraries/Doctrine/DoctrineExtensions/Query/MySql/GroupConcat.php';
-        require_once APPPATH . 'libraries/Doctrine/DoctrineExtensions/Query/MySql/ConcatWs.php';
-        require_once APPPATH . 'libraries/Doctrine/DoctrineExtensions/Query/MySql/IfNull.php';
-
+        if (ENVIRONMENT == "development"):
+            $config->setAutoGenerateProxyClasses(true);
+        else:
+            $config->setAutoGenerateProxyClasses(false);
+        endif;
+        
         $config->addCustomStringFunction('GroupConcat', '\DoctrineExtensions\Query\Mysql\GroupConcat');
         $config->addCustomStringFunction('ConcatWs', '\DoctrineExtensions\Query\Mysql\ConcatWs');
         $config->addCustomStringFunction('IfNull', '\DoctrineExtensions\Query\Mysql\IfNull');
+        $config->addCustomStringFunction('IfNull', '\DoctrineExtensions\Query\Mysql\Date');
 
         $this->em = EntityManager::create($connection_options, $config);
 
